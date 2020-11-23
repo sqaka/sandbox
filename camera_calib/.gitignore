@@ -2,8 +2,9 @@
 .venv
 .vscode
 calib_image/*
-undistortion/*
-tmp/*.png
+chart_image/*
+undist_image/*
+tmp/*
 
 calib_tools.py
 undist_test.py

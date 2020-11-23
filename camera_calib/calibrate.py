@@ -1,36 +1,32 @@
-#
-# カメラの歪みを補正する
-#
-import numpy as np
+#!.venv/bin/python3
+
 import cv2
 import glob
-from time import sleep
-from datetime import datetime
+import numpy as np
+import re
+
+import click
+
 
 TMP_FOLDER_PATH = "./tmp/"
 MTX_PATH = TMP_FOLDER_PATH + "mtx.csv"
 DIST_PATH = TMP_FOLDER_PATH + "dist.csv"
-SAVE_FOLDER_PATH = "./undistortion/"
+SAVE_FOLDER_PATH = "./undist_image"
 
 
-# メイン関数
-def main():
-    calibrateImage() # 画像の歪みを補正
-
-
-# カメラの歪みをCSVファイルを元に補正する関数
-def calibrateImage():
+def calibrateImage(imdir):
+    '''make undistortion'''
     mtx, dist = loadCalibrationFile(MTX_PATH, DIST_PATH)
 
-    for fn in glob.glob("./calib_image/*"):
-        img = cv2.imread(fn)
-        resultImg = cv2.undistort(img, mtx, dist, None) # 内部パラメータを元に画像補正
-        saveImgByTime(SAVE_FOLDER_PATH, resultImg)
-        sleep(1)
+    for fname in glob.glob("{}/*".format(imdir)):
+        img = cv2.imread(fname)
+        # let undistortion using params
+        resultImg = cv2.undistort(img, mtx, dist, None)
+        saveImg(SAVE_FOLDER_PATH, fname, imdir, resultImg)
 
 
-# キャリブレーションCSVファイルを読み込む関数
 def loadCalibrationFile(mtx_path, dist_path):
+    '''read csv_params'''
     try:
         mtx = np.loadtxt(mtx_path, delimiter=',')
         dist = np.loadtxt(dist_path, delimiter=',')
@@ -39,13 +35,19 @@ def loadCalibrationFile(mtx_path, dist_path):
     return mtx, dist
 
 
-# 画像を時刻で保存する関数
-def saveImgByTime(dirPath, img):
-    # 時刻を取得
-    date = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = dirPath + date + ".png"
-    cv2.imwrite(path, img) # ファイル保存
+def saveImg(dirPath, fname, imdir, img):
+    '''save images using same name'''
+    fname = re.sub('{}'.format(imdir), '', fname)
+    fname = re.sub('/', '/undist_', fname)
+    path = dirPath + fname
+    cv2.imwrite(path, img)
     print("saved: ", path)
+
+
+@click.command()
+@click.option('--imdir', type=str, default='calib_image')
+def main(imdir):
+    calibrateImage(imdir)
 
 
 if __name__ == '__main__':

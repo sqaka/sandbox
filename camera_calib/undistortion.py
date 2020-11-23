@@ -1,78 +1,85 @@
-#
-# カメラの歪みを戻すための値を計算する
-#
-import numpy as np
+#!.venv/bin/python3
+
 import cv2
 import glob
-from time import sleep
-from datetime import datetime
+import numpy as np
+import re
+
+import click
 
 TMP_FOLDER_PATH = "./tmp/"
 MTX_PATH = TMP_FOLDER_PATH + "mtx.csv"
 DIST_PATH = TMP_FOLDER_PATH + "dist.csv"
 
 
-# メイン関数
-def main():
-    calcCamera() # カメラの歪みを計算
-
-
-# カメラの歪みを計算する関数
-def calcCamera():
-    square_size = 20.0      # 正方形のサイズ(mm)
-    pattern_size = (10, 7)  # 模様のサイズ
-    pattern_points = np.zeros((np.prod(pattern_size), 3), np.float32) #チェスボード（X,Y,Z）座標の指定 (Z=0)
+def calcCamera(square_size, pattern_size, imdir):
+    '''calculate undistortion param'''
+    # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
+    pattern_points = np.zeros((np.prod(pattern_size), 3), np.float32)
     pattern_points[:, :2] = np.indices(pattern_size).T.reshape(-1, 2)
     pattern_points *= square_size
-    obj_points = []
+    # arrays to store object points and image points from all the images
     img_points = []
+    obj_points = []
  
-    for fn in glob.glob("./calib_image/*"):
-        # 画像の取得
-        im = cv2.imread(fn, 0)
-        print("loading..." + fn)
-        # チェスボードのコーナーを検出
+    # read images
+    for fname in glob.glob("{}/*".format(imdir)):
+        im = cv2.imread(fname, 0)
+        print("loading..." + fname)
+        # detect corners of chessboard
         found, corner = cv2.findChessboardCorners(im, pattern_size)
-        # コーナーがあれば
         if found:
             term = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_COUNT, 30, 0.1)
-            corners2 = cv2.cornerSubPix(im, corner, (5, 5), (-1, -1), term)
-            # マークをつけて画像保存
-            img = cv2.drawChessboardCorners(im, pattern_size, corners2, found)
-            saveImgByTime(TMP_FOLDER_PATH, img)
-            sleep(1)
-        # コーナーがない場合のエラー処理
+            corners = cv2.cornerSubPix(im, corner, (5, 5), (-1, -1), term)
+            # save marking images
+            img = cv2.drawChessboardCorners(im, pattern_size, corners, found)
+            saveImg(TMP_FOLDER_PATH, fname, imdir, img)
+            # sleep(0.5)
+        # skip failure image
         if not found:
             print('chessboard not found')
             continue
-        img_points.append(corner.reshape(-1, 2))   #appendメソッド：リストの最後に因数のオブジェクトを追加
+        # append params in 2D & 3D lists
+        img_points.append(corner.reshape(-1, 2))
         obj_points.append(pattern_points)
  
-    # 内部パラメータを計算
+    # calculate undistortion param
     rms, K, d, r, t = cv2.calibrateCamera(obj_points, img_points, (im.shape[1], im.shape[0]), None, None)
 
-    # 計算結果を表示
+    return rms, K, d
+
+
+def saveImg(dirPath, fname, imdir, img):
+    '''save images using same name'''
+    fname = re.sub('{}'.format(imdir), '', fname)
+    path = dirPath + fname
+    cv2.imwrite(path, img)
+    print("saved: ", path)
+
+
+def outputParams(rms, K, d):
+    # output undistortion param in console
     print("RMS = ", rms)
     print("K = \n", K)
     print("d = ", d.ravel())
 
-    # ファイル保存
-    saveCalibrationFile(K, d, MTX_PATH, DIST_PATH)
 
-
-# キャリブレーションCSVファイルを上書き保存する関数
 def saveCalibrationFile(mtx, dist, mtx_path, dist_path):
-    np.savetxt(mtx_path, mtx, delimiter =',',fmt="%0.14f")   #カメラ行列の保存
-    np.savetxt(dist_path, dist, delimiter =',',fmt="%0.14f") #歪み係数の保存
+    '''undistortion param -> csv_file'''
+    # camera param
+    np.savetxt(mtx_path, mtx, delimiter=',', fmt="%0.14f")
+    # undistortion param
+    np.savetxt(dist_path, dist, delimiter=',', fmt="%0.14f")
 
 
-# 画像を時刻で保存する関数
-def saveImgByTime(dirPath, img):
-    # 時刻を取得
-    date = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = dirPath + date + ".png"
-    cv2.imwrite(path, img) # ファイル保存
-    print("saved: ", path)
+@click.command()
+@click.option('--square_size', type=float, default=20.0)
+@click.option('--pattern_size', type=tuple, default=(10, 7))
+@click.option('--imdir', type=str, default='chart_image')
+def main(square_size, pattern_size, imdir):
+    rms, K, d = calcCamera(square_size, pattern_size, imdir)
+    outputParams(rms, K, d)
+    saveCalibrationFile(K, d, MTX_PATH, DIST_PATH)
 
 
 if __name__ == '__main__':
