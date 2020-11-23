@@ -2,7 +2,7 @@
 the following helpful articles : \
 https://rikoubou.hatenablog.com/entry/2019/03/26/143556 \
 https://qiita.com/ReoNagai/items/5da95dea149c66ddbbdd \
-https://qiita.com/nonbiri15/items/5e59dea66d7733d6d6a3 \
+https://qiita.com/nonbiri15/items/5e59dea66d7733d6d6a3
 
 
 ## readme
@@ -10,19 +10,19 @@ https://qiita.com/nonbiri15/items/5e59dea66d7733d6d6a3 \
 - if you have images to make undistortion, please put into `/calib_image`
 
 ### setup
-- `bash setup.sh`
-- `source .venv/bin/activate`
+- please run `bash setup.sh` first
+- then `source .venv/bin/activate` to make enviroments
 
 ### make undistortion param
-- run `make_undistortion_param.py`
-- option `--square_size`, type=float, default=20.0
-- option `--pattern_size`, type=tuple, default=(10, 7)
-- option `--imdir`, type=str, default=`chart_image/`
+- run `python3 make_undistortion_param.py`
+- option `--square_size`, type=`float`, default=`20.0`
+- option `--pattern_size`, type=`tuple`, default=`(10, 7)`
+- option `--imdir`, type=`str`, default=`chart_image/`
 
 
 ### calibrate image
-- run `calibrate_images.py`
-- option `--imdir`, type=str, default=`calib_image/`
+- run `python3 calibrate_images.py`
+- option `--imdir`, type=`str`, default=`calib_image/`
 
 ## directry
 ```
