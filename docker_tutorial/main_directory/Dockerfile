@@ -4,6 +4,9 @@ SHELL ["/bin/bash", "-l", "-c"]
 WORKDIR /app
 COPY app /app
 ADD requirements.txt /app
-RUN pip install -r requirements.txt
+RUN pip3 install --upgrade pip && \
+    pip3 install --upgrade setuptools && \
+    pip3 install -r requirements.txt
 
-CMD ["python", "main.py"]
+CMD ["uWSGI", "--http", "0.0.0.0:9090", "--wsgi-file", \
+    "/app/main.py", "--callable", "app", "--stats", "0.0.0.0:9191"]
