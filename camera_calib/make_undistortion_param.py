@@ -23,7 +23,7 @@ def calcCamera(square_size, pattern_size, imdir):
     obj_points = []
  
     # read images
-    for fname in glob.glob("{}/*".format(imdir)):
+    for fname in glob.glob("{}*".format(imdir)):
         im = cv2.imread(fname, 0)
         print("loading..." + fname)
         # detect corners of chessboard
@@ -34,7 +34,6 @@ def calcCamera(square_size, pattern_size, imdir):
             # save marking images
             img = cv2.drawChessboardCorners(im, pattern_size, corners, found)
             saveImg(TMP_FOLDER_PATH, fname, imdir, img)
-            # sleep(0.5)
         # skip failure image
         if not found:
             print('chessboard not found')
@@ -58,7 +57,7 @@ def saveImg(dirPath, fname, imdir, img):
 
 
 def outputParams(rms, K, d):
-    # output undistortion param in console
+    '''output undistortion param in console'''
     print("RMS = ", rms)
     print("K = \n", K)
     print("d = ", d.ravel())
@@ -75,7 +74,7 @@ def saveCalibrationFile(mtx, dist, mtx_path, dist_path):
 @click.command()
 @click.option('--square_size', type=float, default=20.0)
 @click.option('--pattern_size', type=tuple, default=(10, 7))
-@click.option('--imdir', type=str, default='chart_image')
+@click.option('--imdir', type=str, default='chart_image/')
 def main(square_size, pattern_size, imdir):
     rms, K, d = calcCamera(square_size, pattern_size, imdir)
     outputParams(rms, K, d)

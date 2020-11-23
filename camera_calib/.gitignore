@@ -5,6 +5,7 @@ calib_image/*
 chart_image/*
 undist_image/*
 tmp/*
+trash/*
 
 calib_tools.py
 undist_test.py

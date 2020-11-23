@@ -11,14 +11,14 @@ import click
 TMP_FOLDER_PATH = "./tmp/"
 MTX_PATH = TMP_FOLDER_PATH + "mtx.csv"
 DIST_PATH = TMP_FOLDER_PATH + "dist.csv"
-SAVE_FOLDER_PATH = "./undist_image"
+SAVE_FOLDER_PATH = "./undist_image/"
 
 
 def calibrateImage(imdir):
     '''make undistortion'''
     mtx, dist = loadCalibrationFile(MTX_PATH, DIST_PATH)
 
-    for fname in glob.glob("{}/*".format(imdir)):
+    for fname in glob.glob("{}*".format(imdir)):
         img = cv2.imread(fname)
         # let undistortion using params
         resultImg = cv2.undistort(img, mtx, dist, None)
@@ -45,7 +45,7 @@ def saveImg(dirPath, fname, imdir, img):
 
 
 @click.command()
-@click.option('--imdir', type=str, default='calib_image')
+@click.option('--imdir', type=str, default='calib_image/')
 def main(imdir):
     calibrateImage(imdir)
 
