@@ -73,7 +73,7 @@ def saveCalibrationFile(mtx, dist, mtx_path, dist_path):
 
 @click.command()
 @click.option('--square_size', type=float, default=20.0)
-@click.option('--pattern_size', type=tuple, default=(10, 7))
+@click.option('--pattern_size', type=tuple, default=(13, 9))
 @click.option('--imdir', type=str, default='chart_image/')
 def main(square_size, pattern_size, imdir):
     rms, K, d = calcCamera(square_size, pattern_size, imdir)

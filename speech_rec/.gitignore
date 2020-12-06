@@ -1,0 +1,7 @@
+input.mp4
+output.wav
+.venv
+.idea
+toybox
+movie
+data/*

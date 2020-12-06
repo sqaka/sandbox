@@ -1,0 +1,11 @@
+google-api-python-client
+matplotlib
+more-itertools
+nara-wpe
+numpy
+pyaudio
+pyroomacoustics
+scipy
+sounddevice
+SpeechRecognition
+click
