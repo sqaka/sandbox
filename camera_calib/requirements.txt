@@ -2,7 +2,7 @@ click==7.1.2
 flake8==3.8.4
 importlib-metadata==3.0.0
 mccabe==0.6.1
-numpy==1.19.4
+numpy==1.22.0
 opencv-python==4.4.0.46
 pycodestyle==2.6.0
 pyflakes==2.2.0
